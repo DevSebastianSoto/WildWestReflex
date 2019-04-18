@@ -2,6 +2,7 @@ package velorum.com.wildwestreflexv2;
 
 import androidx.appcompat.app.AppCompatActivity;
 import velorum.com.wildwestreflexv2.bl.Game;
+import velorum.com.wildwestreflexv2.bl.Round;
 import velorum.com.wildwestreflexv2.bl.Player;
 import velorum.com.wildwestreflexv2.bl.Position;
 
@@ -46,6 +47,8 @@ public class GameActivity extends AppCompatActivity {
     private void playGame() {
         for (int i = 0; i < game.getRounds(); i++) {
             tvCurrentRound.setText(String.valueOf(game.getRounds()-i));
+            Round r = game.getRoundList().get(i);
+            playRound(r);
             getReadyCountDown();
         }
     }
@@ -101,5 +104,9 @@ public class GameActivity extends AppCompatActivity {
                 tvGetReady.setVisibility(View.GONE);
             }
         }.start();
+    }
+
+    private void playRound(Round r){
+        r.setStartTime(System.currentTimeMillis());
     }
 }
