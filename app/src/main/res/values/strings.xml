@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Wild West Reflex</string>
+    <string name="hintNamePlayer1">(Player 1) Name</string>
+    <string name="hintNamePlayer2">(Player 2) Name</string>
+    <string name="hintRoundAmount">Round Amount</string>
+    <string name="btn_begin">Start Game</string>
+    <string name="btn_quick_game">Quick Game</string>
+    <string name="info_quick_game">A quick game will, create a game with default player names and 3 rounds.</string>
+    <string name="rounds">Rounds:</string>
+    <string name="current_winner">Current Winner:</string>
+    <string name="tie">Tie</string>
+    <string name="go">Go!</string>
+    <string name="player_1_name">Player 1</string>
+    <string name="player_2_name">Player 2</string>
+    <string name="get_ready">Get Ready!</string>
+</resources>
