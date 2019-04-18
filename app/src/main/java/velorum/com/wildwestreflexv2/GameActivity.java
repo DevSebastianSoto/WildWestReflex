@@ -37,6 +37,12 @@ public class GameActivity extends AppCompatActivity {
         playGame();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
+
     private void playGame() {
         for (int i = 0; i < game.getRounds(); i++) {
             tvCurrentRound.setText(String.valueOf(game.getRounds()-i));
@@ -46,7 +52,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void initTextViews() {
         tvWinnerName = findViewById(R.id.tv_winner_name);
-        tvPlayer1Name = findViewById(R.id.input_player1_name);
+        tvPlayer1Name = findViewById(R.id.tv_player1_name);
         tvPlayer2Name = findViewById(R.id.tv_player2_name);
         tvCurrentRound = findViewById(R.id.tv_current_round);
         tvGetReady = findViewById(R.id.tv_get_ready);
@@ -65,6 +71,10 @@ public class GameActivity extends AppCompatActivity {
         initPlayerCharacter(p2, (ImageView) findViewById(R.id.iv_alien));
 
         game = new Game(p1, p2, rounds);
+
+        tvPlayer1Name.setText(p1Name);
+        tvPlayer2Name.setText(p2Name);
+
     }
 
     private void initPlayerCharacter(Player player, ImageView character) {
