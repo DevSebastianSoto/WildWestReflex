@@ -29,12 +29,16 @@ public class Player{
         this.character = character;
     }
 
+    public float getCurrentTime() {
+        return currentTime;
+    }
+
     public void setCurrentTime(float currentTime) {
         this.currentTime = currentTime;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void addScore(int score) {
+        this.score += score;
     }
 
     public void die(){

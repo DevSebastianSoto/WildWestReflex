@@ -7,11 +7,14 @@ import velorum.com.wildwestreflexv2.bl.Player;
 import velorum.com.wildwestreflexv2.bl.Position;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Random;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -20,16 +23,25 @@ public class GameActivity extends AppCompatActivity {
     TextView tvPlayer2Name;
     TextView tvCurrentRound;
     TextView tvGetReady;
+    View p1Screen;
+    View p2Screen;
 
     Game game;
+    private int currentRound;
+    private float startTime;
+    private boolean freeFire;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
-        initTextViews();
+        startTime = 0;
+        freeFire = false;
+        initViews();
         initGame();
+        p1Screen.setOnClickListener(setTimeToPlayerOnClick(game.getP1(),game.getP2()));
+        p2Screen.setOnClickListener(setTimeToPlayerOnClick(game.getP2(),game.getP1()));
+
     }
 
     @Override
@@ -45,20 +57,24 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void playGame() {
-        for (int i = 0; i < game.getRounds(); i++) {
-            tvCurrentRound.setText(String.valueOf(game.getRounds()-i));
-            Round r = game.getRoundList().get(i);
-            playRound(r);
-            getReadyCountDown();
+        currentRound = 0;
+        while(currentRound < game.getRounds()){
+            int inRound = currentRound;
+            if(inRound){
+                tvCurrentRound.setText(String.valueOf(currentRound));
+                getReadyCountDown();
+            }
         }
     }
 
-    private void initTextViews() {
+    private void initViews() {
         tvWinnerName = findViewById(R.id.tv_winner_name);
         tvPlayer1Name = findViewById(R.id.tv_player1_name);
         tvPlayer2Name = findViewById(R.id.tv_player2_name);
         tvCurrentRound = findViewById(R.id.tv_current_round);
         tvGetReady = findViewById(R.id.tv_get_ready);
+        p1Screen = findViewById(R.id.btnPlayer1);
+        p2Screen = findViewById(R.id.btnPlayer2);
     }
 
     private void initGame() {
@@ -84,6 +100,29 @@ public class GameActivity extends AppCompatActivity {
         player.setCharacter(character);
     }
 
+    private View.OnClickListener setTimeToPlayerOnClick(final Player player, final Player opponent){
+        return (new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(freeFire && player.getCurrentTime() != 0){
+                    player.setCurrentTime(getTime());
+                    if(opponent.getCurrentTime() != 0){
+                        endRound();
+                    }
+                }
+            }
+        });
+    }
+
+    private void endRound() {
+        freeFire = false;
+        startTime = 0;
+        Player roundWinner = game.getRoundList().get(currentRound).handleRoundWinner(game.getP1(),game.getP2());
+        roundWinner.addScore(1);
+        tvWinnerName.setText(roundWinner.getName());
+        currentRound++;
+    }
+
     private void getReadyCountDown() {
         tvGetReady.setVisibility(View.VISIBLE);
         tvGetReady.setText(getString(R.string.get_ready));
@@ -102,11 +141,42 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvGetReady.setVisibility(View.GONE);
+                playGunShotSound();
             }
         }.start();
     }
 
-    private void playRound(Round r){
-        r.setStartTime(System.currentTimeMillis());
+    private void playGunShotSound(){
+        long millisInFuture = (new Random()).nextInt(10)*1000;
+        final MediaPlayer mp =  MediaPlayer.create(getApplicationContext(),R.raw.gun_shot);
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+        });
+
+        new CountDownTimer(millisInFuture, 1000) {
+
+            @Override
+            public void onTick(long l) {
+            }
+
+            @Override
+            public void onFinish() {
+                mp.start();
+                initRound();
+            }
+        }.start();
+    }
+
+    private void initRound(){
+        startTime = System.currentTimeMillis();
+        game.getRoundList().get(currentRound).setStartTime(startTime);
+    }
+
+    private float getTime(){
+        return System.currentTimeMillis() - startTime;
     }
 }

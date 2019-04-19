@@ -35,4 +35,11 @@ public class Round {
     public void setT2(float t2) {
         this.t2 = t2;
     }
+
+    public Player handleRoundWinner(Player p1, Player p2) {
+        if (p1.getCurrentTime() > p2.getCurrentTime())
+            return p1;
+        else
+            return p2;
+    }
 }
