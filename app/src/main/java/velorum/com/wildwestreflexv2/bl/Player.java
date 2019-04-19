@@ -3,11 +3,11 @@ package velorum.com.wildwestreflexv2.bl;
 import android.widget.ImageView;
 
 public class Player{
-    ImageView character;
-    String name;
-    float currentTime;
-    int score;
-    Position pos;
+    private ImageView character;
+    private String name;
+    private float currentTime;
+    private int score;
+    private Position pos;
 
     public Player(String name, Position pos) {
         this.name = name;
@@ -39,6 +39,10 @@ public class Player{
 
     public void addScore(int score) {
         this.score += score;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     public void die(){

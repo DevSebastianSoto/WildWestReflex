@@ -123,7 +123,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="80sp"
-        android:textColor="@color/colorAccent"
+        android:textColor="@android:color/background_light"
         android:fontFamily="@font/jainem"
         android:layout_centerInParent="true"
         android:text=""

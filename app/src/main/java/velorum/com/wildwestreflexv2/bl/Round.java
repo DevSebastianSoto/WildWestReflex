@@ -37,7 +37,11 @@ public class Round {
     }
 
     public Player handleRoundWinner(Player p1, Player p2) {
-        if (p1.getCurrentTime() > p2.getCurrentTime())
+        this.t1 = p1.getCurrentTime() - this.startTime;
+        this.t2 = p2.getCurrentTime() - this.startTime;
+        p1.setCurrentTime(0);
+        p2.setCurrentTime(0);
+        if (t1 < t2)
             return p1;
         else
             return p2;

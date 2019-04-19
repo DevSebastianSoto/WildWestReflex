@@ -12,7 +12,10 @@ public class Game {
         this.p1 = p1;
         this.p2 = p2;
         this.rounds = rounds;
-        this.roundList = new ArrayList<>();
+        roundList = new ArrayList<>();
+        for (int i = 0; i < rounds; i++) {
+            roundList.add(new Round());
+        }
     }
 
     public Player getP1() {
@@ -45,5 +48,14 @@ public class Game {
 
     public void setRoundList(ArrayList<Round> roundList) {
         this.roundList = roundList;
+    }
+
+    public Player getWinner() {
+        if(p1.getScore() > getP2().getScore())
+            return p1;
+        else if(p2.getScore() > p1.getScore())
+            return p2;
+        else
+            return null;
     }
 }

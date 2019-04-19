@@ -6,10 +6,13 @@ import velorum.com.wildwestreflexv2.bl.Round;
 import velorum.com.wildwestreflexv2.bl.Player;
 import velorum.com.wildwestreflexv2.bl.Position;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,19 +31,18 @@ public class GameActivity extends AppCompatActivity {
 
     Game game;
     private int currentRound;
-    private float startTime;
     private boolean freeFire;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        startTime = 0;
+        currentRound = 0;
         freeFire = false;
         initViews();
         initGame();
-        p1Screen.setOnClickListener(setTimeToPlayerOnClick(game.getP1(),game.getP2()));
-        p2Screen.setOnClickListener(setTimeToPlayerOnClick(game.getP2(),game.getP1()));
+        p1Screen.setOnTouchListener(setTimeToPlayerOnClick(game.getP1(), game.getP2()));
+        p2Screen.setOnTouchListener(setTimeToPlayerOnClick(game.getP2(), game.getP1()));
 
     }
 
@@ -57,14 +59,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void playGame() {
-        currentRound = 0;
-        while(currentRound < game.getRounds()){
-            int inRound = currentRound;
-            if(inRound){
-                tvCurrentRound.setText(String.valueOf(currentRound));
-                getReadyCountDown();
-            }
-        }
+        handleRound(currentRound);
     }
 
     private void initViews() {
@@ -100,27 +95,31 @@ public class GameActivity extends AppCompatActivity {
         player.setCharacter(character);
     }
 
-    private View.OnClickListener setTimeToPlayerOnClick(final Player player, final Player opponent){
-        return (new View.OnClickListener() {
+    private View.OnTouchListener setTimeToPlayerOnClick(final Player player, final Player opponent) {
+        return (new View.OnTouchListener() {
+
             @Override
-            public void onClick(View view) {
-                if(freeFire && player.getCurrentTime() != 0){
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (freeFire && player.getCurrentTime() == 0) {
                     player.setCurrentTime(getTime());
-                    if(opponent.getCurrentTime() != 0){
+                    if (opponent.getCurrentTime() != 0) {
                         endRound();
                     }
                 }
+                return false;
             }
         });
     }
 
     private void endRound() {
         freeFire = false;
-        startTime = 0;
-        Player roundWinner = game.getRoundList().get(currentRound).handleRoundWinner(game.getP1(),game.getP2());
+        Player roundWinner = game.getRoundList().get(currentRound).handleRoundWinner(game.getP1(), game.getP2());
         roundWinner.addScore(1);
-        tvWinnerName.setText(roundWinner.getName());
+
+        String winnerName = (game.getWinner() != null) ? game.getWinner().getName() : getString(R.string.tie);
+        tvWinnerName.setText(winnerName);
         currentRound++;
+        handleRound(currentRound);
     }
 
     private void getReadyCountDown() {
@@ -128,7 +127,7 @@ public class GameActivity extends AppCompatActivity {
         tvGetReady.setText(getString(R.string.get_ready));
         final int totalSeconds = 5;
         long millisInFuture = totalSeconds * 1000;
-        new CountDownTimer(millisInFuture, 1100) {
+        CountDownTimer getReadyCountDown = new CountDownTimer(millisInFuture, 1100) {
             int currentSeconds = totalSeconds;
 
             @Override
@@ -146,9 +145,9 @@ public class GameActivity extends AppCompatActivity {
         }.start();
     }
 
-    private void playGunShotSound(){
-        long millisInFuture = (new Random()).nextInt(10)*1000;
-        final MediaPlayer mp =  MediaPlayer.create(getApplicationContext(),R.raw.gun_shot);
+    private void playGunShotSound() {
+        long millisInFuture = (new Random()).nextInt(10) * 1000;
+        final MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.gun_shot);
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
@@ -165,18 +164,40 @@ public class GameActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                mp.start();
                 initRound();
+                mp.start();
             }
         }.start();
     }
 
-    private void initRound(){
-        startTime = System.currentTimeMillis();
-        game.getRoundList().get(currentRound).setStartTime(startTime);
+    private void initRound() {
+        freeFire = true;
+        game.getRoundList().get(currentRound).setStartTime(getTime());
     }
 
-    private float getTime(){
-        return System.currentTimeMillis() - startTime;
+    private void handleRound(int round) {
+        if (round < game.getRounds()) {
+            tvCurrentRound.setText(String.valueOf(round + 1));
+            getReadyCountDown();
+        } else {
+            final Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
+            new CountDownTimer(5000, 1000) {
+                @Override
+                public void onTick(long l) {
+                    tvGetReady.setText(getString(R.string.game_over));
+                    tvGetReady.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onFinish() {
+                    tvGetReady.setVisibility(View.GONE);
+                    startActivity(intent);
+                }
+            }.start();
+        }
+    }
+
+    private float getTime() {
+        return System.nanoTime();
     }
 }
